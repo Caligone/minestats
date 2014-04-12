@@ -10,9 +10,6 @@ import net.ovski.minecraft.stats.events.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import net.ovski.minecraft.api.entities.PlayerStats;
-import net.ovski.minecraft.api.mysql.MysqlPlayerManager;
-
 /**
  * StatsPlugin
  * Main class of the plugin
@@ -51,7 +48,7 @@ public class StatsPlugin extends JavaPlugin
         this.saveConfig();
         this.listenEvents();
         this.getCommands();
-        new SaveStats(this).runTaskTimer(this, 400, this.getConfig().getInt("TimebetweenSaves")*20);
+        new SaveStatsTask(this).runTaskTimer(this, 400, this.getConfig().getInt("TimebetweenSaves")*20);
         getLogger().info(this.getName()+" v"+this.getDescription().getVersion()+" enabled");
     }
 
@@ -68,7 +65,7 @@ public class StatsPlugin extends JavaPlugin
                 long timePlayed = timeOnServerDisable-playerStats.getTimeSinceLastSave();
                 playerStats.setTimePlayed(playerStats.getTimePlayed()+timePlayed);
             }
-            MysqlPlayerManager.updateStats(playerStats);
+            HTTPAPIManager.updatePlayerStats(playerStats);
         }
         getLogger().info(this.getName()+" v"+this.getDescription().getVersion()+" disabled");
     }
@@ -79,8 +76,6 @@ public class StatsPlugin extends JavaPlugin
     public void getCommands()
     {
         getCommand("stats").setExecutor(new StatsCommand(this));
-        if (StatsPlugin.config.getBoolean("StatsToBeRegistered.prestige"))
-            getCommand("noter").setExecutor(new NoterCommand());
     }
 
     /**
@@ -113,6 +108,7 @@ public class StatsPlugin extends JavaPlugin
 
     /**
      * getPlayerStats method retrieve a PlayerStats object in the playerStatsList
+     * 
      * @param pseudo
      * @return PlayerStats playerStats : Contains the stat object of a player
      */
@@ -123,9 +119,9 @@ public class StatsPlugin extends JavaPlugin
                 return playerStats;
             }
         }
-        // if the playerStats are not in the list, we check if the player have stats and
-        // add them to the list before returning the player
-        PlayerStats playerStats = MysqlPlayerManager.getStats(pseudo);
+        // if the playerStats are not in the list, we check if the player have stats and add them to the list before returning the player
+        // This is used for the /stats command if the player is not in the server but have registered stats
+        PlayerStats playerStats = HTTPAPIManager.getPlayerStats(pseudo);
         if (playerStats != null) {
             if (StatsPlugin.config.getBoolean("StatsToBeRegistered.timeplayed")) {
                 long timeOnJoin = new Date().getTime();

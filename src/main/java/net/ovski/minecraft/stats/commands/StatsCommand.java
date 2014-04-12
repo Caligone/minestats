@@ -2,6 +2,8 @@ package net.ovski.minecraft.stats.commands;
 
 import java.util.Date;
 
+import net.ovski.minecraft.stats.HTTPAPIManager;
+import net.ovski.minecraft.stats.PlayerStats;
 import net.ovski.minecraft.stats.StatsPlugin;
 
 import org.bukkit.command.Command;
@@ -9,9 +11,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.ChatColor;
-
-import net.ovski.minecraft.api.entities.PlayerStats;
-import net.ovski.minecraft.api.mysql.MysqlPlayerManager;
 
 /**
  * StatsCommand
@@ -42,7 +41,7 @@ public class StatsCommand implements CommandExecutor
             if (stats == null) {
                 commandPlayer.sendMessage(ChatColor.RED+"Vous devez vous enregistrer!");
 
-                return true; 
+                return true;
             }
             if (args.length == 0) {
                 PlayerStats playerStats = StatsPlugin.getPlayerStats(commandPlayer.getName());
@@ -79,8 +78,8 @@ public class StatsCommand implements CommandExecutor
                     return true;
                 } catch (NullPointerException e) {
                     //we check if the required player exists in database
-                    if (MysqlPlayerManager.exists(args[0])) {
-                        PlayerStats playerStats = MysqlPlayerManager.getStats(args[0]);
+                    PlayerStats playerStats = HTTPAPIManager.getPlayerStats(args[0]);
+                    if (playerStats != null) {
                         plugin.reloadConfig();
                         commandPlayer.sendMessage(getFormettedStats(playerStats));
                     } else {

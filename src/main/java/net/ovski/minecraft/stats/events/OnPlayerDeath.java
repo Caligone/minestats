@@ -1,5 +1,7 @@
 package net.ovski.minecraft.stats.events;
 
+import net.ovski.minecraft.stats.HTTPAPIManager;
+import net.ovski.minecraft.stats.PlayerStats;
 import net.ovski.minecraft.stats.StatsPlugin;
 
 import org.bukkit.entity.HumanEntity;
@@ -10,10 +12,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
 import java.util.Date;
-
-import net.ovski.minecraft.api.entities.PlayerStats;
-import net.ovski.minecraft.api.mysql.MysqlKillManager;
-import net.ovski.minecraft.api.mysql.MysqlPlayerManager;
 
 /**
  * OnPlayerDeath
@@ -61,16 +59,14 @@ public class OnPlayerDeath implements Listener
             playerKillerStats.incrementKills();
 
             //add a new kill in PlayerKill table
-            int killer_id = MysqlPlayerManager.getPlayerIdFromPseudo(playerKiller.getName());
-            int killed_id = MysqlPlayerManager.getPlayerIdFromPseudo(playerKilled.getName());
             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String currentTime = sdf.format(date);
 
-            MysqlKillManager.insertKill(killer_id, killed_id, playerKiller.getItemInHand().getType().name(), currentTime);
+            HTTPAPIManager.addKill(playerKiller.getName(), playerKilled.getName(), playerKiller.getItemInHand().getType().name(), currentTime);
         } else { // stupid death
             playerKilledStats.incrementStupidDeaths();
         }
 
-        MysqlPlayerManager.updateStats(playerKilledStats);
+        HTTPAPIManager.updatePlayerStats(playerKilledStats);
     }
 }

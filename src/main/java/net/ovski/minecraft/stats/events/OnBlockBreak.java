@@ -1,13 +1,12 @@
 package net.ovski.minecraft.stats.events;
 
 import org.bukkit.Bukkit;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
-import net.ovski.minecraft.api.entities.PlayerStats;
+import net.ovski.minecraft.stats.PlayerStats;
 import net.ovski.minecraft.stats.StatsPlugin;
 
 /**

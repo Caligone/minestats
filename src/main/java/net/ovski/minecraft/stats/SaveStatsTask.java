@@ -1,17 +1,17 @@
 package net.ovski.minecraft.stats;
 
 import java.util.Date;
+
 import org.bukkit.scheduler.BukkitRunnable;
-import net.ovski.minecraft.api.entities.PlayerStats;
-import net.ovski.minecraft.api.mysql.MysqlPlayerManager;
 
 /**
- * SaveStats
+ * SaveStatsTask
+ * 
  * Save the statistic each period (= timeBetweensaves in config.yml)
  * 
  * @author baptiste <baptiste.bouchereau@gmail.com>
  */
-public class SaveStats extends BukkitRunnable
+public class SaveStatsTask extends BukkitRunnable
 {
     private StatsPlugin plugin;
 
@@ -20,7 +20,7 @@ public class SaveStats extends BukkitRunnable
      * 
      * @param plugin
      */
-    public SaveStats(StatsPlugin plugin)
+    public SaveStatsTask(StatsPlugin plugin)
     {
         this.plugin = plugin;
     }
@@ -37,7 +37,7 @@ public class SaveStats extends BukkitRunnable
                 //reset the time since the last save for next time
                 stats.setTimeSinceLastSave(timeOnSave);
             }
-            MysqlPlayerManager.updateStats(stats);
+            HTTPAPIManager.updatePlayerStats(stats);
         }
         StatsPlugin.lastSaveTime = thisTime;
     }

@@ -2,6 +2,8 @@ package net.ovski.minecraft.stats.events;
 
 import java.util.Date;
 
+import net.ovski.minecraft.stats.HTTPAPIManager;
+import net.ovski.minecraft.stats.PlayerStats;
 import net.ovski.minecraft.stats.StatsPlugin;
 
 import org.bukkit.entity.Player;
@@ -9,9 +11,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerQuitEvent;
-
-import net.ovski.minecraft.api.entities.PlayerStats;
-import net.ovski.minecraft.api.mysql.MysqlPlayerManager;
 
 /**
  * OnPlayerQuit
@@ -52,7 +51,7 @@ public class OnPlayerQuit implements Listener
                 long timePlayed = timeOnQuit-playerStats.getTimeSinceLastSave();
                 playerStats.setTimePlayed(playerStats.getTimePlayed()+timePlayed);
             }
-            MysqlPlayerManager.updateStats(playerStats);
+            HTTPAPIManager.updatePlayerStats(playerStats);
             StatsPlugin.playerStatsList.remove(playerStats);
         } catch (NullPointerException e) {
             return; 
