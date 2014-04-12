@@ -2,7 +2,7 @@ package net.ovski.minecraft.stats.events;
 
 import java.util.Date;
 
-import net.ovski.minecraft.stats.HTTPAPIManager;
+import net.ovski.minecraft.stats.HttpApiManager;
 import net.ovski.minecraft.stats.PlayerStats;
 import net.ovski.minecraft.stats.StatsPlugin;
 
@@ -51,7 +51,7 @@ public class OnPlayerQuit implements Listener
                 long timePlayed = timeOnQuit-playerStats.getTimeSinceLastSave();
                 playerStats.setTimePlayed(playerStats.getTimePlayed()+timePlayed);
             }
-            HTTPAPIManager.updatePlayerStats(playerStats);
+            HttpApiManager.updatePlayerStats(playerStats);
             StatsPlugin.playerStatsList.remove(playerStats);
         } catch (NullPointerException e) {
             return; 

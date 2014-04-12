@@ -1,6 +1,6 @@
 package net.ovski.minecraft.stats.events;
 
-import net.ovski.minecraft.stats.HTTPAPIManager;
+import net.ovski.minecraft.stats.HttpApiManager;
 import net.ovski.minecraft.stats.PlayerStats;
 import net.ovski.minecraft.stats.StatsPlugin;
 
@@ -62,11 +62,11 @@ public class OnPlayerDeath implements Listener
             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String currentTime = sdf.format(date);
 
-            HTTPAPIManager.addKill(playerKiller.getName(), playerKilled.getName(), playerKiller.getItemInHand().getType().name(), currentTime);
+            HttpApiManager.addKill(playerKiller.getName(), playerKilled.getName(), playerKiller.getItemInHand().getType().name(), currentTime);
         } else { // stupid death
             playerKilledStats.incrementStupidDeaths();
         }
 
-        HTTPAPIManager.updatePlayerStats(playerKilledStats);
+        HttpApiManager.updatePlayerStats(playerKilledStats);
     }
 }

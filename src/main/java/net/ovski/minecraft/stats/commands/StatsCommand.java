@@ -2,7 +2,7 @@ package net.ovski.minecraft.stats.commands;
 
 import java.util.Date;
 
-import net.ovski.minecraft.stats.HTTPAPIManager;
+import net.ovski.minecraft.stats.HttpApiManager;
 import net.ovski.minecraft.stats.PlayerStats;
 import net.ovski.minecraft.stats.StatsPlugin;
 
@@ -78,7 +78,7 @@ public class StatsCommand implements CommandExecutor
                     return true;
                 } catch (NullPointerException e) {
                     //we check if the required player exists in database
-                    PlayerStats playerStats = HTTPAPIManager.getPlayerStats(args[0]);
+                    PlayerStats playerStats = HttpApiManager.getPlayerStats(args[0]);
                     if (playerStats != null) {
                         plugin.reloadConfig();
                         commandPlayer.sendMessage(getFormettedStats(playerStats));

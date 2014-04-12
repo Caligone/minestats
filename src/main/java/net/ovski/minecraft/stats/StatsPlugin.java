@@ -6,8 +6,8 @@ import java.util.Date;
 
 import net.ovski.minecraft.stats.commands.*;
 import net.ovski.minecraft.stats.events.*;
+import net.ovski.minecraft.stats.tasks.UpdateTask;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -33,9 +33,20 @@ public class StatsPlugin extends JavaPlugin
     public static long lastSaveTime;
 
     /**
-     * The configuration
+     * The api url
      */
-    public static FileConfiguration config;
+    public static String apiUrl;
+
+    /**
+     * initVariables method initialize the variables of the plugin
+     */
+    public void initVariables()
+    {
+        StatsPlugin.timeBetweenSaves = 30; // in seconds;
+        StatsPlugin.lastSaveTime = new Date().getTime();
+        StatsPlugin.playerStatsList  = new ArrayList<PlayerStats>();
+        StatsPlugin.apiUrl = "http://localhost:1337";
+    }
 
     /**
      * onEnable method called when the plugin is loading
@@ -48,7 +59,7 @@ public class StatsPlugin extends JavaPlugin
         this.saveConfig();
         this.listenEvents();
         this.getCommands();
-        new SaveStatsTask(this).runTaskTimer(this, 400, this.getConfig().getInt("TimebetweenSaves")*20);
+        new UpdateTask(this).runTaskTimer(this, 400, this.getConfig().getInt("TimebetweenSaves")*20);
         getLogger().info(this.getName()+" v"+this.getDescription().getVersion()+" enabled");
     }
 
@@ -60,12 +71,10 @@ public class StatsPlugin extends JavaPlugin
     {
         // Save all the stats datas
         for (PlayerStats playerStats : StatsPlugin.playerStatsList) {
-            if (StatsPlugin.config.getBoolean("StatsToBeRegistered.timeplayed")) {
-                long timeOnServerDisable = new Date().getTime();
-                long timePlayed = timeOnServerDisable-playerStats.getTimeSinceLastSave();
-                playerStats.setTimePlayed(playerStats.getTimePlayed()+timePlayed);
-            }
-            HTTPAPIManager.updatePlayerStats(playerStats);
+            long timeOnServerDisable = new Date().getTime();
+            long timePlayed = timeOnServerDisable-playerStats.getTimeSinceLastSave();
+            playerStats.setTimePlayed(playerStats.getTimePlayed()+timePlayed);
+            HttpApiManager.updatePlayerStats(playerStats);
         }
         getLogger().info(this.getName()+" v"+this.getDescription().getVersion()+" disabled");
     }
@@ -83,27 +92,12 @@ public class StatsPlugin extends JavaPlugin
      */
     public void listenEvents()
     {
-        if (this.getConfig().getBoolean("StatsToBeRegistered.blockBreak"))
-            new OnBlockBreak(this);
-        if (this.getConfig().getBoolean("StatsToBeRegistered.blockPlace"))
-            new OnBlockPlace(this);
-        if (this.getConfig().getBoolean("StatsToBeRegistered.deaths"))
-            new OnPlayerDeath(this);
-        if (this.getConfig().getBoolean("StatsToBeRegistered.verbosity"))
-            new OnPlayerChat(this);
+        new OnBlockBreak(this);
+        new OnBlockPlace(this);
+        new OnPlayerDeath(this);
+        new OnPlayerChat(this);
         new OnPlayerJoin(this);
         new OnPlayerQuit(this);
-    }
-
-    /**
-     * initVariables method initialize the variables of the plugin
-     */
-    public void initVariables()
-    {
-        StatsPlugin.config = this.getConfig();
-        StatsPlugin.timeBetweenSaves = StatsPlugin.config.getInt("TimebetweenSaves");
-        StatsPlugin.lastSaveTime = new Date().getTime();
-        StatsPlugin.playerStatsList  = new ArrayList<PlayerStats>();
     }
 
     /**
@@ -119,15 +113,12 @@ public class StatsPlugin extends JavaPlugin
                 return playerStats;
             }
         }
-        // if the playerStats are not in the list, we check if the player have stats and add them to the list before returning the player
+
         // This is used for the /stats command if the player is not in the server but have registered stats
-        PlayerStats playerStats = HTTPAPIManager.getPlayerStats(pseudo);
+        PlayerStats playerStats = HttpApiManager.getPlayerStats(pseudo);
         if (playerStats != null) {
-            if (StatsPlugin.config.getBoolean("StatsToBeRegistered.timeplayed")) {
-                long timeOnJoin = new Date().getTime();
-                playerStats.setTimeSinceLastSave(timeOnJoin);
-            }
-            StatsPlugin.playerStatsList.add(playerStats);
+            long timeOnJoin = new Date().getTime();
+            playerStats.setTimeSinceLastSave(timeOnJoin);
 
             return playerStats;
         }

@@ -2,7 +2,7 @@ package net.ovski.minecraft.stats.events;
 
 import java.util.Date;
 
-import net.ovski.minecraft.stats.HTTPAPIManager;
+import net.ovski.minecraft.stats.HttpApiManager;
 import net.ovski.minecraft.stats.PlayerStats;
 import net.ovski.minecraft.stats.StatsPlugin;
 
@@ -44,7 +44,7 @@ public class OnPlayerJoin implements Listener
     {
         Player player = event.getPlayer();
         //add the player to the list
-        PlayerStats playerStats = HTTPAPIManager.playerConnect(player.getName());
+        PlayerStats playerStats = HttpApiManager.playerConnect(player.getName());
         if (playerStats != null) {
             if (plugin.getConfig().getBoolean("StatsToBeRegistered.timeplayed")) {
                 long timeOnJoin = new Date().getTime();
