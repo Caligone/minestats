@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
+import net.ovski.exceptions.KeyNotSetException;
+import net.ovski.exceptions.ServerNotFoundException;
 import net.ovski.minecraft.stats.commands.*;
 import net.ovski.minecraft.stats.events.*;
 import net.ovski.minecraft.stats.tasks.UpdateTask;
 
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -38,10 +42,16 @@ public class StatsPlugin extends JavaPlugin
     public static String apiUrl;
 
     /**
+     * The configuration
+     */
+    public static FileConfiguration config;
+
+    /**
      * initVariables method initialize the variables of the plugin
      */
     public void initVariables()
     {
+	StatsPlugin.config = this.getConfig();
         StatsPlugin.timeBetweenSaves = 30; // in seconds;
         StatsPlugin.lastSaveTime = new Date().getTime();
         StatsPlugin.playerStatsList  = new ArrayList<PlayerStats>();
@@ -59,8 +69,23 @@ public class StatsPlugin extends JavaPlugin
         this.saveConfig();
         this.listenEvents();
         this.getCommands();
-        new UpdateTask(this).runTaskTimer(this, 400, this.getConfig().getInt("TimebetweenSaves")*20);
-        getLogger().info(this.getName()+" v"+this.getDescription().getVersion()+" enabled");
+        try {
+	    HttpApiManager.serverConnect();
+	    new UpdateTask().runTaskTimer(this, 400, this.getConfig().getInt("TimebetweenSaves")*20);
+	    this.getLogger().info(this.getName()+" v"+this.getDescription().getVersion()+" enabled");
+	} catch (KeyNotSetException e) {
+	    this.getLogger().warning(
+	        "The key is not set in the configuration file. " +
+	        "You must edit you config.yml file and add the following line : 'key: myKey'."
+            );
+	    Bukkit.getPluginManager().disablePlugin(this);
+	} catch (ServerNotFoundException e) {
+	    this.getLogger().warning(
+		"The key set in the configuration file is wrong, or your server has not been initialized yet. " +
+		"Contact minelog administrators for more informations."
+	    );
+	    Bukkit.getPluginManager().disablePlugin(this);
+	}
     }
 
     /**

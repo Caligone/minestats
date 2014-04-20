@@ -1,12 +1,12 @@
 package net.ovski.minecraft.stats;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
+import net.ovski.exceptions.KeyNotSetException;
+import net.ovski.exceptions.ServerNotFoundException;
+import net.ovski.tools.HttpTools;
+import net.ovski.tools.Tools;
+
+import org.bukkit.Bukkit;
+import org.json.simple.JSONObject;
 
 /**
  * HTTPAPIManager
@@ -60,52 +60,46 @@ public class HttpApiManager
      */
     public static PlayerStats playerConnect(String pseudo)
     {
-        String url = StatsPlugin.apiUrl;
-        url += "/user/create?pseudo="+pseudo;
-        URL obj;
-        try {
-            obj = new URL(url);
-            HttpURLConnection connexion;
-            try {
-                connexion = (HttpURLConnection) obj.openConnection();
-                try {
-                    connexion.setRequestMethod("GET");
-                    connexion.setRequestProperty("User-Agent", "Mozilla/5.0");
+        //String url = StatsPlugin.apiUrl+"/user/create?pseudo="+pseudo;
+        //String response = HttpTools.sendHttpRequest(url);
 
-                    int responseCode = connexion.getResponseCode();
-                    System.out.println("\nSending 'GET' request to URL : " + url);
-                    System.out.println("Response Code : " + responseCode);
-
-                    BufferedReader in = new BufferedReader(new InputStreamReader(connexion.getInputStream()));
-                    String inputLine;
-                    StringBuffer response = new StringBuffer();
-
-                    while ((inputLine = in.readLine()) != null) {
-                        response.append(inputLine);
-                    }
-                    in.close();
-                    System.out.println(response.toString());
-                    return null;
-                } catch (ProtocolException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return null;
     }
 
     /**
      * Create a server on connection or update it
+     * /api/connect?key=:key&name=:name&version=:version&size=:size
+     * 
+     * @throws ServerNotFoundException 
+     * @throws Exception
      */
-    public static void serverConnect()
+    public static void serverConnect() throws KeyNotSetException, ServerNotFoundException
     {
-        
+	String key = StatsPlugin.config.getString("key");
+	if (key == null) {
+	    throw new KeyNotSetException();
+	} else {
+    	    String name = StatsPlugin.config.getString("name");
+    	    String size = String.valueOf(Bukkit.getServer().getMaxPlayers());
+    	    String version = Tools.getBukkitVersionNumber();
+    	    String[][] params = new String [][] {
+    	        {"key", key},
+    	        {"name", name},
+    	        {"version", version},
+    	        {"size", size},
+    	    };
+    	    String url = HttpTools.createApiUrl("/api/connect", params);
+    	    JSONObject json = HttpTools.sendHttpRequest(url);
+    	    if (Integer.valueOf(json.get("status").toString()) != 0) {
+    		String message = (String)json.get("message");
+    		if (message.equals("Server not found")) {
+    		    throw new ServerNotFoundException(message);
+    		}
+    		Bukkit.getServer().getPluginManager().getPlugin("MineStats").getLogger()
+    		    .warning("The server sent an error back :"+message);
+    	    }
+    	    // TODO TEST API/PLUGIN VERSION
+	}
     }
 
     /**
@@ -115,4 +109,6 @@ public class HttpApiManager
     {
         
     }
+
+    
 }

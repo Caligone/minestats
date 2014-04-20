@@ -17,18 +17,6 @@ import org.bukkit.scheduler.BukkitRunnable;
  */
 public class UpdateTask extends BukkitRunnable
 {
-    private StatsPlugin plugin;
-
-    /**
-     * Constructor
-     * 
-     * @param plugin
-     */
-    public UpdateTask(StatsPlugin plugin)
-    {
-        this.plugin = plugin;
-    }
-
     public void run()
     {
         long thisTime = new Date().getTime();
