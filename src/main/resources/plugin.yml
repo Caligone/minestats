@@ -1,5 +1,5 @@
 name: MineStats
-version: 0.9
+version: 1.0
 main: net.ovski.minecraft.stats.StatsPlugin
 commands:
     stats:

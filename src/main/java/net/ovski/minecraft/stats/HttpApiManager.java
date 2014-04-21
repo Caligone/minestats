@@ -1,7 +1,7 @@
 package net.ovski.minecraft.stats;
 
 import net.ovski.exceptions.KeyNotSetException;
-import net.ovski.exceptions.ServerNotFoundException;
+import net.ovski.exceptions.ServerErrorException;
 import net.ovski.tools.HttpTools;
 import net.ovski.tools.Tools;
 
@@ -54,52 +54,66 @@ public class HttpApiManager
 
     /**
      * playerConnect method create a new player in database, or update last login, then return stats informations anyway
+     * /api/playerconnect?key=:key&pseudo=:pseudo
      * 
      * @param pseudo : the pseudo of the player
      * @return PlayerStats : a playerStats object;
+     * @throws KeyNotSetException 
+     * @throws ServerErrorException 
      */
     public static PlayerStats playerConnect(String pseudo)
     {
-        //String url = StatsPlugin.apiUrl+"/user/create?pseudo="+pseudo;
-        //String response = HttpTools.sendHttpRequest(url);
-
-        return null;
+	String key = StatsPlugin.key;
+	String[][] params = new String [][] {
+	    {"key", key},
+	    {"pseudo", pseudo}
+	};
+	String url = HttpTools.createApiUrl("/api/playerconnect", params);
+	JSONObject json = HttpTools.sendHttpRequest(url);
+	if (Integer.valueOf(json.get("status").toString()) != 0) {
+	    String message = (String)json.get("message");
+	    Bukkit.getPluginManager().getPlugin("MineStats").getLogger()
+	    .warning("The server sent back an error : "+message);
+	    return null;
+    	} else {
+    	    //http://stackoverflow.com/questions/20080422/access-to-the-values-in-a-multi-level-json-structure
+    	    return null;
+    	}
     }
 
     /**
      * Create a server on connection or update it
      * /api/connect?key=:key&name=:name&version=:version&size=:size
      * 
-     * @throws ServerNotFoundException 
-     * @throws Exception
+     * @throws ServerErrorException 
+     * @throws KeyNotSetException
      */
-    public static void serverConnect() throws KeyNotSetException, ServerNotFoundException
+    public static void serverConnect(StatsPlugin plugin)
     {
-	String key = StatsPlugin.config.getString("key");
-	if (key == null) {
-	    throw new KeyNotSetException();
-	} else {
-    	    String name = StatsPlugin.config.getString("name");
-    	    String size = String.valueOf(Bukkit.getServer().getMaxPlayers());
-    	    String version = Tools.getBukkitVersionNumber();
-    	    String[][] params = new String [][] {
-    	        {"key", key},
-    	        {"name", name},
-    	        {"version", version},
-    	        {"size", size},
-    	    };
-    	    String url = HttpTools.createApiUrl("/api/connect", params);
-    	    JSONObject json = HttpTools.sendHttpRequest(url);
-    	    if (Integer.valueOf(json.get("status").toString()) != 0) {
-    		String message = (String)json.get("message");
-    		if (message.equals("Server not found")) {
-    		    throw new ServerNotFoundException(message);
-    		}
-    		Bukkit.getServer().getPluginManager().getPlugin("MineStats").getLogger()
-    		    .warning("The server sent an error back :"+message);
-    	    }
-    	    // TODO TEST API/PLUGIN VERSION
-	}
+	String name = StatsPlugin.config.getString("name");
+	String size = String.valueOf(Bukkit.getServer().getMaxPlayers());
+	String version = Tools.getBukkitVersionNumber();
+	String[][] params = new String [][] {
+	    {"key", StatsPlugin.key},
+	    {"name", name},
+	    {"version", version},
+	    {"size", size},
+	};
+	String url = HttpTools.createApiUrl("/api/connect", params);
+	JSONObject json = HttpTools.sendHttpRequest(url);
+	if (Integer.valueOf(json.get("status").toString()) != 0) {
+	    String message = json.get("message").toString();
+	    if (message.toString().equals("Server not found")) {
+    	        plugin.getLogger().warning(
+    	            "The key set in the configuration file could be wrong, the server down or your server has not been initialized yet. " +
+    	            "Contact minelog administrators for more informations."
+    	        );
+    	        Bukkit.getPluginManager().disablePlugin(plugin);
+	    } else {
+		plugin.getLogger().warning("The server sent back an error : "+message);
+	    }
+    	}
+    	// TODO TEST API/PLUGIN VERSION
     }
 
     /**

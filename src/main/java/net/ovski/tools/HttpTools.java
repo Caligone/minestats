@@ -47,7 +47,7 @@ public class HttpTools
      * Get response from the http request determined by the url
      * 
      * @param String url
-     * @return String response
+     * @return JSONObject response
      */
     public static JSONObject sendHttpRequest(String url)
     {
@@ -62,8 +62,7 @@ public class HttpTools
                     connexion.setRequestProperty("User-Agent", "Mozilla/5.0");
 
                     int responseCode = connexion.getResponseCode();
-                    System.out.println("Sending 'GET' request to " + url +". Respose code is "+responseCode);
-
+                    System.out.println("Sending 'GET' request to " + url +". Response code is "+responseCode);
                     BufferedReader in = new BufferedReader(new InputStreamReader(connexion.getInputStream()));
                     String inputLine;
                     StringBuffer response = new StringBuffer();
@@ -73,6 +72,7 @@ public class HttpTools
                     }
                     in.close();
                     try {
+                	System.out.println("Response is : "+response.toString());
 			JSONObject jsonObject = (JSONObject) new JSONParser().parse(response.toString());
 			return jsonObject;
 		    } catch (ParseException e) {
