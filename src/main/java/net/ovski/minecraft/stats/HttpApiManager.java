@@ -86,14 +86,15 @@ public class HttpApiManager
     public static void updatePlayerStats(PlayerStats playerStats)
     {
 	String key = StatsPlugin.key;
+	String pseudo = playerStats.getPseudo();
 	String[][] params = new String [][] {
 	    {"key", key},
-	    {"pseudo", playerStats.getPseudo()},
+	    {"pseudo", pseudo},
 	    {"verbosity", String.valueOf(playerStats.getVerbosity())},
 	    {"blocksBroken", String.valueOf(playerStats.getBlocksBroken())},
 	    {"blocksPlaced", String.valueOf(playerStats.getBlocksPlaced())},
 	    {"stupidDeaths", String.valueOf(playerStats.getStupidDeaths())},
-	    {"level", "0"}
+	    {"level", String.valueOf(Bukkit.getPlayer(pseudo).getTotalExperience())}
 	};
 	String url = HttpTools.createApiUrl("/api/updatePlayer", params);
 	JSONObject json = HttpTools.sendHttpRequest(url);
@@ -169,11 +170,20 @@ public class HttpApiManager
 
     /**
      * Update the server heartbeat
+     * /api/heartbeat?key=:key
      */
     public static void updateHeartbeat()
     {
-        
+	String key = StatsPlugin.key;
+	String[][] params = new String [][] {
+	    {"key", key}
+	};
+	String url = HttpTools.createApiUrl("/api/heartbeat", params);
+	JSONObject json = HttpTools.sendHttpRequest(url);
+	if (Integer.valueOf(json.get("status").toString()) != 0) {
+	    String message = (String)json.get("message");
+	    Bukkit.getPluginManager().getPlugin("MineStats").getLogger()
+	        .warning("The server sent back an error : "+message);
+    	}
     }
-
-    
 }
