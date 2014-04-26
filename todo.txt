@@ -1,0 +1,3 @@
+Json player : remove player updated
+Test de la version de l'api (compatibilité)
+Add level in playerStats
