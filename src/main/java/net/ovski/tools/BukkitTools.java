@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 
-public class Tools
+public class BukkitTools
 {
     /**
      * Get bukkit version

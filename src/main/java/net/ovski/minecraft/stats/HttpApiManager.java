@@ -3,7 +3,8 @@ package net.ovski.minecraft.stats;
 import net.ovski.exceptions.KeyNotSetException;
 import net.ovski.exceptions.ServerErrorException;
 import net.ovski.tools.HttpTools;
-import net.ovski.tools.Tools;
+import net.ovski.tools.BukkitTools;
+import net.ovski.tools.JsonTools;
 
 import org.bukkit.Bukkit;
 import org.json.simple.JSONObject;
@@ -73,11 +74,13 @@ public class HttpApiManager
 	if (Integer.valueOf(json.get("status").toString()) != 0) {
 	    String message = (String)json.get("message");
 	    Bukkit.getPluginManager().getPlugin("MineStats").getLogger()
-	    .warning("The server sent back an error : "+message);
+	        .warning("The server sent back an error : "+message);
+
 	    return null;
     	} else {
-    	    //http://stackoverflow.com/questions/20080422/access-to-the-values-in-a-multi-level-json-structure
-    	    return null;
+    	    String serverId = JsonTools.getServerId(json, key);
+
+    	    return JsonTools.getPlayerStats(json, serverId);
     	}
     }
 
@@ -92,7 +95,7 @@ public class HttpApiManager
     {
 	String name = StatsPlugin.config.getString("name");
 	String size = String.valueOf(Bukkit.getServer().getMaxPlayers());
-	String version = Tools.getBukkitVersionNumber();
+	String version = BukkitTools.getBukkitVersionNumber();
 	String[][] params = new String [][] {
 	    {"key", StatsPlugin.key},
 	    {"name", name},

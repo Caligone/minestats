@@ -18,7 +18,6 @@ public class PlayerStats
     private long timePlayed; //in milliseconds
     private int verbosity;
     private long timeSinceLastSave; //in milliseconds
-    private int prestige;
 
     /**
      * getFormattedTimePlayed method format the TimePlayed in String
@@ -285,25 +284,5 @@ public class PlayerStats
     public void setTimeSinceLastSave(long timeSinceLastSave)
     {
         this.timeSinceLastSave = timeSinceLastSave;
-    }
-
-    /**
-     * Get the prestige
-     * 
-     * @return the prestige
-     */
-    public int getPrestige()
-    {
-        return prestige;
-    }
-
-    /**
-     * Set the prestige
-     * 
-     * @param prestige the prestige to set
-     */
-    public void setPrestige(int prestige)
-    {
-        this.prestige = prestige;
     }
 }

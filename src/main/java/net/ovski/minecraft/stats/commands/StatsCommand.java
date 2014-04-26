@@ -135,11 +135,6 @@ public class StatsCommand implements CommandExecutor
             containStats = true;
             verbosityString = ChatColor.BLUE+"bavardise: "+ChatColor.WHITE+playerStats.getVerbosity()+"\n";
         }
-        String appreciationString = "";
-        if (plugin.getConfig().getBoolean("StatsToBeRegistered.prestige")) {
-            containStats = true;
-            appreciationString = ChatColor.BLUE+"prestige: "+ChatColor.WHITE+playerStats.getPrestige();
-        }
 
         if(containStats) {
             return "--------- "+playerStats.getPseudo()+" - Statistiques ---------\n"
@@ -148,7 +143,6 @@ public class StatsCommand implements CommandExecutor
                 + deathsString
                 + timeplayedString
                 + verbosityString
-                + appreciationString
             ;
         } else {
             return "Desole, aucune statistique n'est activee";
